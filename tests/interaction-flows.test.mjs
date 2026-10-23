@@ -225,3 +225,23 @@ test('textbook sync replaces old cached chunks and keeps the selected source ID'
  await a.run("syncTextbookKnowledge('book_abc')");
  assert.equal(a.run('state.sources.length'),1);assert.equal(a.run('state.sources[0].knowledgeRevision'),'new');assert.equal(a.run('state.sources[0].questionRecords[0].questionId'),'bound');assert.equal(a.run('state.selectedSourceIds[0]'),'textbook_abc');
 });
+
+test('step learning persists per chat, leaves other chats unchanged and can be disabled', async()=>{
+ const a=setup();a.run("state.chats=[{id:'one',messages:[]},{id:'two',messages:[]}];state.activeChatId='one'");
+ await a.run('toggleStepLearning()');assert.equal(a.run('state.chats[0].stepLearning'),true);
+ a.run("state.activeChatId='two'");assert.equal(a.run('stepLearningEnabled()'),false);
+ a.run("state.activeChatId='one'");assert.equal(a.run('stepLearningEnabled()'),true);
+ await a.run('toggleStepLearning()');assert.equal(a.run('stepLearningEnabled()'),false);
+});
+test('step learning selection for a new chat is saved and cannot switch during generation',async()=>{
+ const a=setup();await a.run('toggleStepLearning()');assert.equal(a.run('state.newChatLearningMode'),true);
+ a.run('chatBusy=true');await a.run('toggleStepLearning()');assert.equal(a.run('stepLearningEnabled()'),true);
+});
+test('step learning changes teaching pace without removing evidence requirements',()=>{
+ const a=setup();const prompt=a.run('stepLearningPrompt()');assert.match(prompt,/本轮只讲一个/);assert.match(prompt,/等待用户回复/);assert.match(prompt,/没懂/);assert.match(prompt,/不覆盖来源/);
+});
+test('new step-learning chat injects the mode and turning it off removes it next turn',async()=>{
+ const a=setup();a.run(`state.newChatLearningMode=true;composerDraft='讲解磁盘调度';canUseChatModel=()=>true;currentChatModelChoice=()=>({provider:'siliconflow',model:'chat'});streamChat=async(body,signal,onToken)=>{globalThis.sentLearningBody=body;onToken('先理解磁头移动。这个概念清楚了吗？')}`);
+ await a.run('sendChat()');assert.equal(a.run('activeChat().stepLearning'),true);assert.equal(a.run('state.newChatLearningMode'),false);assert.match(a.run('sentLearningBody.messages[0].content'),/逐步学习模式/);
+ await a.run('toggleStepLearning()');a.run("composerDraft='给我完整讲解'");await a.run('sendChat()');assert.doesNotMatch(a.run('sentLearningBody.messages[0].content'),/逐步学习模式/);
+});
