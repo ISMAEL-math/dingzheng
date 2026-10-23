@@ -92,7 +92,7 @@ test('answer tutoring never labels model reasoning as textbook official explanat
 });
 test('textbook import explains the MinerU free-tier limit when no key is configured',()=>{
  const a=setup();a.run("serverMineruKeyAvailable=false;state.settings.mineruApiKey=''");
- assert.match(a.run('textbookLibraryPage()'),/免密额度仅支持 10 MB \/ 20 页以内的 PDF/u);
+ assert.match(a.run('textbookLibraryPage()'),/免密额度限 10 MB \/ 20 页/u);
  a.run("serverMineruKeyAvailable=true");assert.match(a.run('textbookLibraryPage()'),/MinerU Key 已配置/u);
 });
 test('empty textbook library finishes loading without repeatedly replacing the upload control',async()=>{
