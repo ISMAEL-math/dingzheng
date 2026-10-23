@@ -1,0 +1,30 @@
+{
+  "name": "dingzheng-workbench",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node server.mjs",
+    "build:markdown": "esbuild chat-markdown-renderer.js --bundle --format=esm --outfile=public/vendor/chat-markdown.js",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "@llamaindex/openai": "^0.4.22",
+    "dompurify": "^3.4.17",
+    "fflate": "^0.8.3",
+    "jose": "^6.2.13",
+    "katex": "^0.19.0",
+    "llamaindex": "^0.12.1",
+    "pdfjs-dist": "6.4.299",
+    "rehype-katex": "^7.0.1",
+    "rehype-stringify": "^10.0.1",
+    "remark-gfm": "^4.0.1",
+    "remark-math": "^6.0.0",
+    "remark-parse": "^11.0.0",
+    "remark-rehype": "^11.1.2",
+    "unified": "^11.0.5"
+  },
+  "devDependencies": {
+    "esbuild": "^0.28.2"
+  }
+}
