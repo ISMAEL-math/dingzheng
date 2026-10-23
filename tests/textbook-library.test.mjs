@@ -146,3 +146,20 @@ test('archived textbooks are hidden from matching but remain readable for histor
   assert.ok(await service.getQuestion(questionId));
   assert.equal((await service.match({ question: completed.questions[0].question })).status, 'none');
 });
+
+test('import uses saved content list even when Markdown has no page markers', async t => {
+  const items = [
+    { text: '3.1.7 本节习题精选', type: 'text', page_idx: 0 },
+    { text: '一、单项选择题', type: 'text', page_idx: 0 },
+    { text: '01. 正确的是（）。A. 甲 B. 乙', type: 'text', page_idx: 0 },
+    { text: '3.1.8 答案与解析', type: 'text', page_idx: 1 },
+    { text: '一、单项选择题', type: 'text', page_idx: 1 },
+    { text: '01. B', type: 'text', page_idx: 1 },
+  ];
+  const { directory, service } = await createLibrary(async () => ({ markdown: '无页码 Markdown', files: [{ name: 'nested/test_content_list.json', data: Buffer.from(JSON.stringify(items)) }] }));
+  t.after(() => rm(directory, { recursive: true, force: true }));
+  const imported = await service.createImport({ bytes: pdfBytes('structured'), fileName: '教材.pdf', pageCount: 2 });
+  const book = await waitFor(service, imported.book.bookId, b => ['completed','failed'].includes(b.job.status));
+  assert.equal(book.job.status,'completed'); assert.equal(book.pageNumbersKnown,true);
+  assert.equal(book.questions.length,1);assert.equal(book.questions[0].correctAnswer,'B');assert.equal(book.questions[0].answerPage,2);
+});

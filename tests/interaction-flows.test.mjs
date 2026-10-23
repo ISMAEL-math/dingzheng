@@ -1,3 +1,4 @@
+import {linkedQuestionEvidence} from '../public/linked-question-search.js';
 import * as questionModel from '../public/question-model.js';
 import {createPaperUI} from '../public/paper-ui.js';
 import test from 'node:test';
@@ -13,7 +14,7 @@ const source=(await readFile(new URL('../public/app.js',import.meta.url),'utf8')
 function setup(){
  const fields=new Map([['#camera-capture',{}]]),chatModelCheckboxes=[]; const root={innerHTML:'',scrollTop:0,querySelectorAll:selector=>selector==='[data-enabled-chat-model]'?chatModelCheckboxes:[]};
  const document={querySelector:s=>s==='#page-root'||s==='#modal-root'?root:fields.get(s)||null,querySelectorAll:()=>[],addEventListener:()=>{}};
- let generatedId=0;const context=vm.createContext({...questionModel,...chatModels,createPaperUI,...questionCompletion,...questionPresentation,isDocumentWideQuery:()=>false,normalizeNotebooks,collectQuestions,createNotebookUI,document,window:{matchMedia:()=>({matches:true,addEventListener(){}}),scrollTo(){}},indexedDB:{open:()=>({})},console,AbortController,AbortSignal,DOMException,setTimeout,clearTimeout,requestAnimationFrame:fn=>fn(),renderChatMarkdown:x=>x,crypto:{randomUUID:()=> `fixture-${++generatedId}`}});
+ let generatedId=0;const context=vm.createContext({linkedQuestionEvidence,...questionModel,...chatModels,createPaperUI,...questionCompletion,...questionPresentation,isDocumentWideQuery:()=>false,normalizeNotebooks,collectQuestions,createNotebookUI,document,window:{matchMedia:()=>({matches:true,addEventListener(){}}),scrollTo(){}},indexedDB:{open:()=>({})},console,AbortController,AbortSignal,DOMException,setTimeout,clearTimeout,requestAnimationFrame:fn=>fn(),renderChatMarkdown:x=>x,crypto:{randomUUID:()=> `fixture-${++generatedId}`}});
  vm.runInContext(source,context);
  vm.runInContext('save=async snapshot=>{globalThis.lastSaved=snapshot};render=()=>{};notify=()=>{};',context);
  const run=code=>vm.runInContext(code,context);
@@ -210,4 +211,17 @@ test('grading requests time out and question workers stay within the configured 
  a.run('globalThis.activeGradeWorkers=0;globalThis.maxGradeWorkers=0');
  await a.run("runBoundedGrading([0,1,2,3,4],GRADING_QUESTION_CONCURRENCY,async()=>{activeGradeWorkers++;maxGradeWorkers=Math.max(maxGradeWorkers,activeGradeWorkers);await new Promise(resolve=>setTimeout(resolve,2));activeGradeWorkers--},new AbortController().signal)");
  assert.equal(a.run('maxGradeWorkers'),2);
+});
+
+test('a supported answer is not replaced by the old missing-answer-key refusal', async()=>{
+ const a=setup();
+ a.run(`callChat=async()=>({choices:[{message:{content:'教材候选答案为 C，尚待人工核验。[E1]'}}]});`);
+ const answer=await a.run(`runKnowledgeAgent({messages:[{role:'system',content:'学习助手'}],model:'test',connection:{},selectedIds:['os'],question:'做一下这个题 A.文件名 B.权限 C.位置',initialRefs:[{source:'操作系统',sourceId:'os',chunkId:'q',pageNumber:96,kind:'linked_question',answerVerified:false,text:'候选答案 C；答案页 107'}],signal:new AbortController().signal,onStatus:()=>{}})`);
+ assert.match(answer,/候选答案为 C/);assert.doesNotMatch(answer,/暂时不猜答案/);
+});
+test('textbook sync replaces old cached chunks and keeps the selected source ID',async()=>{
+ const a=setup();
+ a.run(`state.sources=[{id:'textbook_abc',knowledgeRevision:'old',chunks:[{text:'旧文本'}]}];state.selectedSourceIds=['textbook_abc'];textbookApi=async()=>({revision:'new',title:'教材',pages:[{number:1,text:'新文本'}],questionRecords:[{questionId:'bound'}]});globalThis.buildMarkdownChunks=()=>({chunks:[{text:'新文本'}],headings:[],tocPages:[]});hasSiliconFlowKey=()=>false;`);
+ await a.run("syncTextbookKnowledge('book_abc')");
+ assert.equal(a.run('state.sources.length'),1);assert.equal(a.run('state.sources[0].knowledgeRevision'),'new');assert.equal(a.run('state.sources[0].questionRecords[0].questionId'),'bound');assert.equal(a.run('state.selectedSourceIds[0]'),'textbook_abc');
 });

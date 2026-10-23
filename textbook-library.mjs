@@ -1,3 +1,4 @@
+import { buildStructuredDocument } from './textbook-structured.mjs';
 import { createHash } from 'node:crypto';
 import { mkdir, readFile, readdir, rename, rm, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
@@ -248,11 +249,21 @@ export function createTextbookLibrary({ directory, parseDocument, cleanBatch }) 
       let document;
       if (startIndex <= 1) {
         stage = 'structure'; await updateStage(book, stage, '正在提取章节、页码和内容片段');
-        document = buildDocumentModel(markdown, book.pageCount || 0);
+        const filesRoot = join(bookPath(bookId), 'mineru', 'files');
+        let contentFile;
+        try { contentFile = (await readdir(filesRoot, { recursive: true })).sort().find(name => name.endsWith('_content_list.json') || name === 'content_list.json'); }
+        catch (error) { if (error.code !== 'ENOENT') throw error; }
+        document = contentFile
+          ? buildStructuredDocument(JSON.parse(await readFile(join(filesRoot, contentFile), 'utf8')), book.pageCount || 0)
+          : buildDocumentModel(markdown, book.pageCount || 0);
         if (document.pageCount > MAX_PAGES) throw new Error(`MinerU 识别到 ${document.pageCount} 页，超过 ${MAX_PAGES} 页上限。`);
         await atomicJson(join(bookPath(bookId), 'document-pages.json'), document.pages);
         book.pageCount = document.pageCount;
         book.pageNumbersKnown = document.pageNumbersKnown;
+        book.structureVersion = 2;
+        if (document.pageNumbersKnown) book.warnings = (book.warnings || []).filter(w => !w.includes('没有明确的页码标记'));
+        const unscoped = [...new Set(document.pages.flatMap(page => page.blocks).filter(block => block.region === 'answer' && !block.group).map(block => block.pageNumber))];
+        if (unscoped.length) book.warnings = [...new Set([...(book.warnings || []), `PDF 第 ${unscoped.join('、')} 页答案区缺少可靠练习组，请核对原图及 OCR。`])];
         book.sections = document.headings;
         if (!document.pageNumbersKnown) book.warnings = [...new Set([...(book.warnings || []), 'MinerU 输出没有明确的页码标记，来源页码暂时不可靠。'])];
         book.job.completedStages = [...new Set([...(book.job.completedStages || []), 'structure'])];
@@ -340,7 +351,8 @@ export function createTextbookLibrary({ directory, parseDocument, cleanBatch }) 
     const book = await readDetail(bookId);
     if (!book || book.archived) return null;
     if (book.job?.status === 'queued' || book.job?.status === 'running') return snapshot(book);
-    const startStage = STAGES.includes(book.job?.failedStage) ? book.job.failedStage : 'mineru';
+    let startStage = STAGES.includes(book.job?.failedStage) ? book.job.failedStage : 'mineru';
+    if (book.structureVersion !== 2 && STAGES.indexOf(startStage) > 1 && !book.questions.some(q => ['verified', 'rejected'].includes(q.status))) startStage = 'structure';
     book.job.status = 'queued'; book.job.error = ''; book.job.failedStage = ''; book.job.message = '等待重试'; book.job.updatedAt = Date.now(); book.processingStatus = 'queued'; book.processingError = '';
     await saveMeta(book);
     schedule(bookId, config, startStage);
@@ -424,7 +436,9 @@ export function createTextbookLibrary({ directory, parseDocument, cleanBatch }) 
     if (!book || book.archived) return null;
     try {
       const pages = JSON.parse(await readFile(join(bookPath(bookId), 'document-pages.json'), 'utf8'));
-      return { bookId, title: book.title, fileName: book.fileName, pageCount: book.pageCount, sections: book.sections || [], pages: pages.map(page => ({ number: page.number, headingPath: page.headingPath || [], text: String(page.content || '').slice(0, 50000) })).filter(page => page.text.trim()) };
+      const records = JSON.parse(await readFile(questionsPath(bookId), 'utf8'));
+      const revision = stableTextId('knowledge', JSON.stringify([pages, records]), 24);
+      return { bookId, revision, questionRecords: records.filter(q => q.status !== 'rejected'), title: book.title, fileName: book.fileName, pageCount: book.pageCount, sections: book.sections || [], pages: pages.map(page => ({ number: page.number, headingPath: page.headingPath || [], text: String(page.content || '').slice(0, 50000) })).filter(page => page.text.trim()) };
     } catch (error) { if (error.code === 'ENOENT') return null; throw error; }
   }
 

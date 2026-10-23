@@ -1,3 +1,4 @@
+import { extractStructuredQuestions } from './textbook-structured.mjs';
 import { createHash } from 'node:crypto';
 
 const QUESTION_HEADING = /习题|练习|自测|试题|题目|作业|测验|测试|思考题|精选/u;
@@ -158,6 +159,7 @@ function parseOptions(text) {
 }
 
 export function extractQuestionRecords(document, bookId) {
+  if (document.pages?.some(page => page.blocks?.some(block => block.region))) return extractStructuredQuestions(document, bookId);
   const flatLines = [];
   for (const page of document.pages || []) {
     let path = [...(page.headingPath || [])];
