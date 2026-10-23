@@ -917,3 +917,35 @@ input[type="checkbox"],input[type="radio"]{accent-color:#1f2124}
 .textbook-progress i{background:#1f2124}
 .context-meter span{background:#1f2124}
 .context-ring .ring-fill{stroke:#1f2124}
+
+/* ===== 知识库引用菜单：列表可滚动、条目整理、箭头内收 ===== */
+.composer-menu .knowledge-list{max-height:244px;overflow-y:auto;overscroll-behavior:contain;margin:0 -4px;padding:0 4px 2px;scrollbar-width:thin}
+.composer-menu .knowledge-list::-webkit-scrollbar{width:5px}
+.composer-menu .knowledge-list::-webkit-scrollbar-thumb{background:#dedede;border-radius:3px}
+.knowledge-option{min-height:52px;gap:10px;padding:8px 10px}
+.knowledge-option:hover{background:#f6f6f6}
+.knowledge-option:has(input:checked){background:#f2f2f2}
+.knowledge-option:has(input:checked) .knowledge-copy strong{color:#111}
+.knowledge-option .source-mini{flex:none;width:34px;height:24px;display:grid;place-items:center;padding:0;border-radius:5px;background:#f2f2f2;color:#8b8b8b;font-size:10px;font-weight:600;letter-spacing:.4px}
+.knowledge-option .knowledge-copy small{font-size:12px;color:#8a9098}
+.knowledge-foot{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:6px;padding:9px 10px 2px;border-top:1px solid #f0f0f0;font-size:12px;color:#949aa2}
+.knowledge-foot .text-link{font-size:12px;padding:0}
+.knowledge-empty .text-link{color:#7c7c7c}
+
+/* ===== 下拉框：自定义小箭头，内收不贴边线 ===== */
+.select,:is(.workflow-page,.settings-workspace,.intelligent-card,.camera-device-picker) .select{appearance:none;-webkit-appearance:none;padding-right:36px;background-image:url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%23767c85' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center}
+
+/* ===== 学习资料列表：卡片化整理 ===== */
+#source-list{display:grid;gap:12px}
+.document-row{padding:16px 18px 14px;border:1px solid #ebebeb;border-radius:13px;background:#fff}
+.document-row .document-warning{margin:12px 0 0}
+.document-actions{margin-top:13px;padding:12px 0 0;border-top:1px solid #f2f2f2;flex-wrap:wrap;row-gap:8px}
+.document-more{position:relative;margin-left:auto;font-size:13px}
+.document-more>div{top:calc(100% + 4px)}
+
+/* ===== 输入区右下角：模型箭头与边缘留出间距 ===== */
+.composer-cluster{margin-right:4px}
+.chat-model-trigger .chevron{border-right-color:#82878f;border-bottom-color:#82878f}
+
+/* ===== 弹出菜单整体限高：矮窗口内可滚，不顶出视野 ===== */
+.composer-menu{max-height:calc(100vh - 150px);max-height:calc(100svh - 150px);overflow-y:auto;overscroll-behavior:contain}
