@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { enabledLanguageChatModels, isLanguageChatModel } from '../public/chat-models.mjs';
+import { enabledLanguageChatModels, isLanguageChatModel, contextWindowFor } from '../public/chat-models.mjs';
 
 test('keeps general language models, including named Codex families', () => {
   for (const model of ['GPT-6.1-Sol', 'GPT-6-Luna', 'GPT-6-Astra', 'deepseek-ai/DeepSeek-V4-Flash', 'Qwen/Qwen3-32B']) {
@@ -27,4 +27,12 @@ test('limits the home chat picker to enabled language models', () => {
 test('keeps selected model metadata while removing duplicates and disabled entries', () => {
   const catalog = [{ id: 'vendor/model-a', name: 'Model A' }, { id: 'vendor/model-b', name: 'Model B' }, { id: 'vendor/model-a', name: 'Duplicate' }];
   assert.deepEqual(enabledLanguageChatModels(catalog, ['vendor/model-a']), [{ id: 'vendor/model-a', name: 'Model A' }]);
+});
+
+test('estimates context windows by model family with a common default', () => {
+  assert.equal(contextWindowFor('deepseek-ai/DeepSeek-V4-Flash'), 128000);
+  assert.equal(contextWindowFor('Qwen/Qwen3-32B'), 131072);
+  assert.equal(contextWindowFor('gpt-5.1-codex'), 400000);
+  assert.equal(contextWindowFor('unknown-vendor/model-x'), 128000);
+  assert.equal(contextWindowFor(''), 128000);
 });

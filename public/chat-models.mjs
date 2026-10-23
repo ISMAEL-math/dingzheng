@@ -20,3 +20,23 @@ export function enabledLanguageChatModels(models, enabledIds) {
     return true;
   });
 }
+
+// 各模型家族的上下文窗口估算（token）。未匹配到时用通用默认值；
+// 弹层展示时标注“估算”，避免把不精确的窗口当成官方参数。
+const CONTEXT_WINDOW_RULES = [
+  [/gpt-5|codex/iu, 400000],
+  [/deepseek/iu, 128000],
+  [/qwen3|qwen2\.5|qwen/iu, 131072],
+  [/glm-4|glm/iu, 128000],
+  [/kimi|moonshot/iu, 256000],
+  [/llama/iu, 128000],
+  [/mistral|mixtral/iu, 128000],
+];
+const CONTEXT_WINDOW_DEFAULT = 128000;
+
+export function contextWindowFor(model) {
+  const id = String(model || '');
+  if (!id.trim()) return CONTEXT_WINDOW_DEFAULT;
+  for (const [pattern, size] of CONTEXT_WINDOW_RULES) if (pattern.test(id)) return size;
+  return CONTEXT_WINDOW_DEFAULT;
+}
