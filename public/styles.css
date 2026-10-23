@@ -756,3 +756,43 @@ body.sidebar-collapsed .profile-menu{left:88px;right:auto;bottom:12px;width:292p
 .textbook-question-editor{width:min(760px,calc(100vw - 32px));max-height:min(88vh,900px);overflow:auto}.textbook-question-editor h2{margin:0;font-size:16px}.textbook-question-editor .field{margin:12px 0}.textbook-question-editor .textarea{min-height:58px}.textbook-page-fields{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.textbook-page-fields label{display:grid;gap:6px;color:#616b64;font-size:12px}.textbook-ai-suggestion{margin:14px 0;padding:10px;border:1px solid var(--line);border-radius:9px;color:#66716a;font-size:12px}.textbook-ai-suggestion pre{max-height:180px;overflow:auto;white-space:pre-wrap;font-size:12px}.textbook-loading{color:var(--muted);font-size:12px}
 @media(max-width:680px){.nav-list{grid-template-columns:repeat(5,minmax(0,1fr))}}
 @media(max-width:680px){.textbook-upload-panel{flex-direction:column;align-items:stretch}.textbook-upload-panel>.primary-button{align-self:flex-start}.textbook-catalog,.textbook-detail,.textbook-upload-panel{padding:16px}.textbook-row-main{gap:8px}.textbook-row-stats,.textbook-row-link{margin-left:40px}.textbook-metrics{grid-template-columns:repeat(3,minmax(0,1fr));row-gap:12px}.textbook-detail-actions{gap:6px}.textbook-detail-actions .danger-text{margin-left:0}.textbook-question>header{align-items:flex-start}.textbook-question>header strong{max-width:170px}.textbook-page-fields{grid-template-columns:1fr}.textbook-question-editor .modal-actions{flex-wrap:wrap}.textbook-question-editor .modal-actions button{flex:1}}
+
+/* ===== 移动端适配补强（≤680px）：主页 Hero 折叠、iOS 输入缩放、触控目标、安全区 ===== */
+@media(max-width:680px){
+  /* 主页：折叠桌面版的大留白 Hero */
+  .chat-workspace{padding:20px 16px 96px}
+  .chat-workspace.has-chat{padding:16px 12px 96px}
+  .welcome-block{margin:0 0 22px}
+  .welcome-block h1{font-size:29px;gap:10px;flex-wrap:wrap}
+  .welcome-block img{width:36px;height:36px}
+  .welcome-tagline{font-size:13px;letter-spacing:.04em}
+  .prompt-suggestions{margin-top:14px;gap:6px}
+  .prompt-suggestions button{font-size:15px;line-height:1.5;min-height:34px}
+
+  /* 输入框 ≥16px，避免 iOS Safari 聚焦时自动放大页面 */
+  .input,.textarea,.select,
+  :is(.workflow-page,.settings-workspace,.intelligent-card,.notebook-filters,.library-toolbar,.document-filters,.pdf-editor) :is(.input,.select,.textarea),
+  .pdf-controls input{font-size:16px}
+  .chat-composer{border-radius:20px;padding:14px 14px 12px;min-height:0}
+  .chat-composer textarea{min-height:52px;font-size:16px}
+  .chat-model-name{font-size:13px}
+  .composer-tool{font-size:13px}
+
+  /* 顶栏紧凑化 */
+  .breadcrumb{font-size:16px}
+  .chat-history-button,.new-chat-button{padding:7px 10px;font-size:13px}
+  .mobile-profile-toggle .avatar{width:30px;height:30px;font-size:12px}
+
+  /* 触控目标加大：主按钮至少 44px 高 */
+  .primary-button,.secondary-button,.subtle-button{min-height:44px;justify-content:center}
+  .grading-controls .primary-button{min-height:46px;font-size:14px}
+  .small-button{min-height:36px}
+
+  /* 底部 Tab 栏与内容区留出安全区 */
+  .main-area{padding-bottom:calc(76px + env(safe-area-inset-bottom))}
+  .sidebar{height:auto;min-height:69px}
+  .nav-item,.nav-item.active{height:56px;gap:4px}
+  .nav-icon{font-size:20px}
+  .toast{bottom:calc(80px + env(safe-area-inset-bottom));left:12px;right:12px;transform:none;width:auto}
+  .toast.show{transform:none}
+}
