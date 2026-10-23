@@ -307,9 +307,9 @@ function chatContextInfo(){
 }
 function contextPillMarkup(){
  const info=chatContextInfo();
- if(!info)return `<button type="button" class="context-pill" data-context-toggle aria-expanded="false" title="上下文容量" aria-label="查看上下文容量"><svg class="context-ring" viewBox="0 0 22 22" width="22" height="22" aria-hidden="true"><circle class="ring-track" cx="11" cy="11" r="9" fill="none" stroke-width="2"></circle><circle class="ring-dot" cx="11" cy="11" r="2.4"></circle></svg></button>`;
- const state=info.pct>=.85?'full':info.pct>=.6?'warn':'',offset=56.55-(56.55*info.pct);
- return `<button type="button" class="context-pill ${state}" data-context-toggle aria-expanded="false" title="上下文容量 ${Math.round(info.pct*100)}%" aria-label="查看上下文容量，已用 ${Math.round(info.pct*100)}%"><svg class="context-ring" viewBox="0 0 22 22" width="22" height="22" aria-hidden="true"><circle class="ring-track" cx="11" cy="11" r="9" fill="none" stroke-width="2"></circle><circle class="ring-fill" cx="11" cy="11" r="9" fill="none" stroke-width="2" stroke-linecap="round" stroke-dasharray="56.55" stroke-dashoffset="${offset.toFixed(1)}" transform="rotate(-90 11 11)"></circle></svg></button>`;
+ if(!info)return `<button type="button" class="context-pill" data-context-toggle aria-expanded="false" title="上下文容量" aria-label="查看上下文容量"><svg class="context-ring" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><circle class="ring-track" cx="8" cy="8" r="6.5" fill="none" stroke-width="2"></circle></svg></button>`;
+ const state=info.pct>=.85?'full':info.pct>=.6?'warn':'',offset=40.84-(40.84*info.pct);
+ return `<button type="button" class="context-pill ${state}" data-context-toggle aria-expanded="false" title="上下文容量 ${Math.round(info.pct*100)}%" aria-label="查看上下文容量，已用 ${Math.round(info.pct*100)}%"><svg class="context-ring" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><circle class="ring-track" cx="8" cy="8" r="6.5" fill="none" stroke-width="2"></circle><circle class="ring-fill" cx="8" cy="8" r="6.5" fill="none" stroke-width="2" stroke-linecap="round" stroke-dasharray="40.84" stroke-dashoffset="${offset.toFixed(1)}" transform="rotate(-90 8 8)"></circle></svg></button>`;
 }
 function contextPopoverMarkup(){
  const info=chatContextInfo();

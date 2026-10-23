@@ -799,14 +799,13 @@ body.sidebar-collapsed .profile-menu{left:88px;right:auto;bottom:12px;width:292p
 
 /* ===== 输入框右下角：上下文圆环 + 模型文字选择器（紧凑一组） ===== */
 .composer-cluster{position:relative;display:flex;align-items:center;gap:6px}
-.context-pill{width:30px;height:30px;border:0;background:transparent;display:grid;place-items:center;padding:0;color:#555b61;border-radius:9px;transition:background .16s}
+.context-pill{width:26px;height:26px;border:0;background:transparent;display:grid;place-items:center;padding:0;color:#555b61;border-radius:8px;transition:background .16s}
 .context-pill:hover,.context-pill[aria-expanded=true]{background:#f5f6f7}
 .context-pill:focus-visible{outline:2px solid #7990f2;outline-offset:1px}
-.context-ring .ring-track{stroke:#e3e5ea}
+.context-ring .ring-track{stroke:#dcdee3}
 .context-ring .ring-fill{stroke:#2563eb}
 .context-pill.warn .ring-fill{stroke:#d9822b}
 .context-pill.full .ring-fill{stroke:#c2504a}
-.context-ring .ring-dot{fill:#c6cad1}
 .context-popover{position:absolute;right:0;bottom:calc(100% + 12px);z-index:9;width:300px;padding:16px;background:#fff;border:1px solid #e7e8eb;border-radius:14px;box-shadow:0 14px 40px rgba(22,28,40,.16);color:#3a3f46}
 .context-popover[hidden]{display:none}
 .context-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
