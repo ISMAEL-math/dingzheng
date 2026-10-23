@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { enabledLanguageChatModels, isLanguageChatModel, contextWindowFor } from '../public/chat-models.mjs';
+import { enabledLanguageChatModels, isLanguageChatModel, contextWindowFor, shortModelName } from '../public/chat-models.mjs';
 
 test('keeps general language models, including named Codex families', () => {
   for (const model of ['GPT-6.1-Sol', 'GPT-6-Luna', 'GPT-6-Astra', 'deepseek-ai/DeepSeek-V4-Flash', 'Qwen/Qwen3-32B']) {
@@ -35,4 +35,11 @@ test('estimates context windows by model family with a common default', () => {
   assert.equal(contextWindowFor('gpt-5.1-codex'), 400000);
   assert.equal(contextWindowFor('unknown-vendor/model-x'), 128000);
   assert.equal(contextWindowFor(''), 128000);
+});
+
+test('shortens model names for the picker label', () => {
+  assert.equal(shortModelName('deepseek-ai/DeepSeek-V4-Flash'), 'DeepSeek-V4-Flash');
+  assert.equal(shortModelName('Qwen/Qwen3-32B-Instruct'), 'Qwen3-32B');
+  assert.equal(shortModelName('gpt-5.1-codex'), 'gpt-5.1-codex');
+  assert.equal(shortModelName(''), '');
 });

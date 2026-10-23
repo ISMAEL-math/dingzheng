@@ -40,3 +40,11 @@ export function contextWindowFor(model) {
   for (const [pattern, size] of CONTEXT_WINDOW_RULES) if (pattern.test(id)) return size;
   return CONTEXT_WINDOW_DEFAULT;
 }
+
+// 菜单和输入框按钮用短名：去掉厂商前缀（deepseek-ai/ 等）和 -Instruct 后缀。
+export function shortModelName(name) {
+  let value = String(name || '').trim();
+  const slash = value.lastIndexOf('/');
+  if (slash >= 0) value = value.slice(slash + 1);
+  return value.replace(/-Instruct$/iu, '') || value;
+}
