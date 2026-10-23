@@ -228,7 +228,7 @@ function defaultChatModelChoice(){
  return{provider:'siliconflow',model:state.settings.chatModel||''};
 }
 function currentChatModelChoice(){const choice=activeChat()?.modelChoice||composerModelChoice||defaultChatModelChoice(),normalized={provider:choice.provider==='codex'?'codex':'siliconflow',model:String(choice.model||'')};if(normalized.provider==='siliconflow'&&!state.settings.enabledChatModels.includes(normalized.model)){const fallback=defaultChatModelChoice();return fallback.provider==='siliconflow'&&state.settings.enabledChatModels.includes(fallback.model)?fallback:{provider:'siliconflow',model:state.settings.enabledChatModels[0]||''}}return normalized}
-function hasConfiguredSiliconFlow(){return Boolean(state.settings.apiKey.trim())||serverKeyAvailable===true}
+function hasConfiguredSiliconFlow(){return Boolean(state.settings.apiKey.trim())||serverKeyAvailable!==false}
 function canUseChatModel(choice){return Boolean(choice?.model)&&(choice.provider==='codex'?codexState.planEnabled:hasConfiguredSiliconFlow())}
 function chatModelGroups(){
  const choice=currentChatModelChoice(),groups=[];
