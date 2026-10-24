@@ -949,3 +949,11 @@ input[type="checkbox"],input[type="radio"]{accent-color:#1f2124}
 
 /* ===== 弹出菜单整体限高：矮窗口内可滚，不顶出视野 ===== */
 .composer-menu{max-height:calc(100vh - 150px);max-height:calc(100svh - 150px);overflow-y:auto;overscroll-behavior:contain}
+
+/* ===== 说明收纳：小 ⓘ 圆圈，悬停/点按展开解释 ===== */
+.info-dot{display:inline-flex;align-items:center;justify-content:center;width:17px;height:17px;margin-left:7px;padding:0;border:1px solid #cfcfcf;border-radius:50%;background:#fff;color:#8b8b8b;font-size:12px;font-style:italic;font-family:Georgia,'Times New Roman',serif;line-height:1;vertical-align:1px;cursor:help;position:relative;-webkit-tap-highlight-color:transparent}
+.info-dot:hover,.info-dot:focus,.info-dot:focus-visible{border-color:#8f8f8f;color:#4c4c4c;outline:none}
+.info-dot::after{content:attr(data-tip);position:absolute;left:50%;bottom:calc(100% + 9px);transform:translateX(-50%) translateY(3px);width:max-content;max-width:250px;padding:8px 11px;border:1px solid #e4e4e4;border-radius:9px;background:#fff;color:#5c5c5c;font-size:12px;font-style:normal;font-family:'DM Sans','Noto Sans SC',sans-serif;font-weight:400;line-height:1.65;text-align:left;white-space:normal;box-shadow:0 10px 28px rgba(20,20,20,.12);opacity:0;pointer-events:none;transition:opacity .15s,transform .15s;z-index:30}
+.info-dot:hover::after,.info-dot:focus::after,.info-dot:focus-visible::after{opacity:1;transform:translateX(-50%) translateY(0)}
+.info-dot.tip-open::after{opacity:1;transform:translateX(-50%) translateY(0)}
+.info-dot.tip-open{border-color:#8f8f8f;color:#4c4c4c}
