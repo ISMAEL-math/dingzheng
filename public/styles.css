@@ -979,3 +979,14 @@ input[type="checkbox"],input[type="radio"]{accent-color:#1f2124}
 .document-warning{display:flex;align-items:baseline;gap:7px;max-height:30px;overflow:hidden;padding:5px 11px;border:0;border-left:3px solid #e0b26e;border-radius:7px;background:#faf7f1;color:#8a6f45;font-size:12.5px;line-height:1.5;cursor:default;transition:max-height .18s ease}
 .document-warning::before{content:"⚠";flex:none;font-size:11px;color:#c69a4e;transform:translateY(1px)}
 .document-warning:hover,.document-warning:focus-within{max-height:240px}
+
+/* ===== 教材库蓝色主题恢复层（用户指定；仅作用于教材库页元素） ===== */
+.textbook-cover{background:linear-gradient(150deg,#3159cc,#6f96f4);color:#fff;box-shadow:inset -5px 0 0 #26469f,0 3px 9px rgba(38,64,140,.16)}
+.textbook-upload-panel{background:linear-gradient(180deg,#fafcff,#fff);border-color:#e5e7eb}
+.textbook-row-title:hover{color:#3159cc}
+.textbook-row{border-top:1px solid #eceef2}
+.textbook-progress{background:#e9ecf2}
+.textbook-progress i{background:linear-gradient(90deg,#3b6fe8,#6f96f4)}
+.textbook-row-link{color:#b6bdc8}
+.textbook-row-link:hover{color:#3159cc}
+.textbook-row .tag.blue,.textbook-detail .tag.blue{background:#e3ecfc;color:#3a5ec7;font-weight:600}
