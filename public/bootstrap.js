@@ -1,4 +1,4 @@
-import {createServerStorage,encodeStoredValue,storageRequest} from './server-storage.js';
+import {createServerStorage,encodeStoredValue,storageRequest,localMigrationDecision} from './server-storage.js';
 const status=document.createElement('div');status.id='service-status';document.body.append(status);
 function message(text){status.textContent=text}
 async function login(){
@@ -15,13 +15,12 @@ async function migrateLocal(revision){
   if(!db.objectStoreNames.contains('workspace'))return revision;
   const read=(store,key)=>new Promise((resolve,reject)=>{const r=db.transaction(store).objectStore(store).get(key);r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error)});
   const state=await read('workspace','state');if(!state)return revision;
-  if(existing.value){
-   if(localStorage.getItem('dingzheng-local-migrated')!=='yes'){
-    const useRemote=confirm('服务端已有学习记录，此浏览器也有旧记录。为避免覆盖，本次不会自动合并。继续使用服务端记录？旧浏览器记录仍保留；取消可暂不启动并先安排迁移。');
-    if(!useRemote)throw new Error('已暂停迁移：两份记录均已保留');
-    localStorage.setItem('dingzheng-local-migrated','yes');
-   }
-   return revision;
+  const decision=localMigrationDecision(state,existing.value,localStorage.getItem('dingzheng-local-migrated')==='yes');
+  if(decision==='none')return revision;
+  if(decision==='confirm'){
+   const useRemote=confirm('服务端已有学习记录，此浏览器也有旧记录。为避免覆盖，本次不会自动合并。继续使用服务端记录？旧浏览器记录仍保留；取消可暂不启动并先安排迁移。');
+   if(!useRemote)throw new Error('已暂停迁移：两份记录均已保留');
+   localStorage.setItem('dingzheng-local-migrated','yes');return revision;
   }
   message('正在把本机学习数据和 PDF 迁到服务端；原浏览器数据保留…');
   if(db.objectStoreNames.contains('pdfFiles')){

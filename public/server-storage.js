@@ -27,3 +27,10 @@ export function createServerStorage(initialRevision,request=storageRequest){
   return tx;
  }};
 }
+
+export function localMigrationDecision(localState,serverValue,alreadyMigrated){
+ if(!localState)return 'none';
+ const hasStudyData=value=>['sources','sessions','mistakes','chats','notebooks','subjects','tags'].some(key=>Array.isArray(value?.[key])&&value[key].length);
+ if(!serverValue||(hasStudyData(localState)&&!hasStudyData(serverValue.data)))return 'migrate';
+ return alreadyMigrated?'none':'confirm';
+}
