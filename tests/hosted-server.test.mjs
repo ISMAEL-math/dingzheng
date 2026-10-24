@@ -1,0 +1,27 @@
+import test from 'node:test';
+import http from 'node:http';
+import assert from 'node:assert/strict';
+import {mkdtemp,rm,mkdir,writeFile} from 'node:fs/promises';
+import {tmpdir} from 'node:os';
+import {join} from 'node:path';
+import {spawn} from 'node:child_process';
+import {once} from 'node:events';
+import {WorkspaceStore} from '../workspace-store.mjs';
+test('hosted API enforces login, origin, per-user workspace and textbook access',async t=>{
+ const directory=await mkdtemp(join(tmpdir(),'dingzheng-hosted-'));const store=new WorkspaceStore(directory);const alice=await store.createUser('alice','a-long-test-password');await store.createUser('bob','another-test-password');store.close();
+ const book='book_'+'a'.repeat(24),bookPath=join(directory,'users',alice.id,'textbook-library',book);await mkdir(bookPath,{recursive:true});await writeFile(join(bookPath,'book.json'),JSON.stringify({bookId:book,title:'Alice private',createdAt:1,job:{status:'completed'}}));await writeFile(join(bookPath,'questions.json'),'[]');
+ const port=18000+Math.floor(Math.random()*15000),origin='https://study.test';
+ const child=spawn(process.execPath,['server.mjs'],{env:{...process.env,APP_MODE:'hosted',HOST:'127.0.0.1',DATA_DIR:directory,PORT:String(port),PUBLIC_ORIGIN:origin,APP_VERSION:'test-release'},stdio:['ignore','pipe','pipe']});let output='';child.stderr.on('data',c=>output+=c);child.stdout.on('data',c=>output+=c);
+ t.after(async()=>{if(child.exitCode===null){child.kill('SIGTERM');await once(child,'exit')}await rm(directory,{recursive:true,force:true})});
+ const call=(path,opts={})=>new Promise((resolve,reject)=>{const req=http.request({host:'127.0.0.1',port,path,method:opts.method||'GET',headers:{Host:'study.test',Origin:origin,'Content-Type':'application/json',...opts.headers}},res=>{let body='';res.on('data',c=>body+=c);res.on('end',()=>resolve({status:res.statusCode,ok:res.statusCode<300,headers:{get:name=>{const value=res.headers[name];return Array.isArray(value)?value[0]:value}},json:async()=>JSON.parse(body)}))});req.on('error',reject);req.end(opts.body)});
+ let ready=false;for(let i=0;i<100;i++){if(child.exitCode!==null)throw new Error(output);try{if((await call('/readyz')).ok){ready=true;break}}catch{}await new Promise(r=>setTimeout(r,100))}assert.ok(ready,output);
+ assert.equal((await call('/api/textbooks')).status,401);assert.equal((await call('/api/storage/meta',{headers:{Origin:'https://evil.test'}})).status,403);
+ const login=async(username,password)=>{const r=await call('/api/auth/login',{method:'POST',body:JSON.stringify({username,password})});assert.equal(r.status,200);const cookie=r.headers.get('set-cookie');assert.match(cookie,/HttpOnly/);assert.match(cookie,/Secure/);return cookie.split(';')[0]};
+ const ac=await login('alice','a-long-test-password'),bc=await login('bob','another-test-password');
+ assert.equal((await call(`/api/textbooks/${book}`,{headers:{Cookie:bc}})).status,404);assert.equal((await call(`/api/textbooks/${book}`,{headers:{Cookie:ac}})).status,200);
+ assert.equal((await call('/api/storage/meta',{headers:{Cookie:bc,'X-Workspace-User':alice.id}})).status,409);
+ const write=await call('/api/storage/transaction',{method:'POST',headers:{Cookie:ac},body:JSON.stringify({revision:0,operations:[{type:'put',store:'workspace',key:'state',value:{data:'alice'}}]})});assert.equal(write.status,200);
+ assert.equal((await(await call('/api/storage/entry?store=workspace&key=state',{headers:{Cookie:bc}})).json()).value,null);
+ await call('/api/auth/logout',{method:'POST',headers:{Cookie:ac},body:'{}'});assert.equal((await call('/api/storage/meta',{headers:{Cookie:ac}})).status,401);
+ assert.equal((await(await call('/healthz')).json()).version,'test-release');
+});

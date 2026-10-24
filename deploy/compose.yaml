@@ -1,0 +1,23 @@
+services:
+  app:
+    image: ${APP_IMAGE:?Set APP_IMAGE to a tested immutable image tag or digest}
+    restart: unless-stopped
+    init: true
+    stop_grace_period: 30s
+    ports:
+      - "127.0.0.1:4173:4173"
+    env_file:
+      - .env
+    environment:
+      APP_MODE: hosted
+      DATA_DIR: /data
+      PUBLIC_ORIGIN: ${PUBLIC_ORIGIN:?Set the HTTPS site origin}
+    volumes:
+      - learning-data:/data
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+volumes:
+  learning-data:

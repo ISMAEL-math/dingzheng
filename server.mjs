@@ -1,6 +1,9 @@
 import http from 'node:http';
-import { readFile } from 'node:fs/promises';
-import { extname, join, normalize } from 'node:path';
+import { execFileSync } from 'node:child_process';
+import { WorkspaceStore } from './workspace-store.mjs';
+import { sessionToken, sameOrigin, cookie } from './access-control.mjs';
+import { readFile, writeFile, unlink } from 'node:fs/promises';
+import { extname, join, normalize, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { randomUUID } from 'node:crypto';
 import { unzipSync, strFromU8 } from 'fflate';
@@ -19,16 +22,64 @@ try {
   }
 } catch {}
 
-const textbookLibrary = createTextbookLibrary({
-  directory: join(root, '.local', 'textbook-library'),
-  parseDocument: options => parseWithMinerU({ ...options, includeArtifacts: true }),
-  cleanBatch: cleanTextbookBatch,
-});
-await textbookLibrary.initialize();
+const hosted = process.env.APP_MODE === 'hosted';
+const port = Number(process.env.PORT) || 4173;
+const publicOrigin = process.env.PUBLIC_ORIGIN || `http://localhost:${port}`;
+if(hosted && (!process.env.PUBLIC_ORIGIN || !publicOrigin.startsWith('https://')))throw new Error('托管模式必须设置 HTTPS PUBLIC_ORIGIN');
+if(new URL(publicOrigin).origin!==publicOrigin)throw new Error('PUBLIC_ORIGIN 必须是不含路径的完整 origin');
+const dataDirectory=resolve(process.env.DATA_DIR || join(root,'.local'));
+const workspaceStore=new WorkspaceStore(dataDirectory);
+const lockPath=join(dataDirectory,'server.lock');
+try{const previous=JSON.parse(await readFile(lockPath,'utf8'));try{process.kill(previous.pid,0);throw new Error('此数据目录已有运行中的服务')}catch(e){if(e.code!=='ESRCH')throw e}await unlink(lockPath)}catch(e){if(e.code!=='ENOENT')throw e}
+await writeFile(lockPath,JSON.stringify({pid:process.pid}),{flag:'wx',mode:0o600});
+
+const libraries=new Map();
+async function libraryFor(uid){
+ if(!libraries.has(uid)){
+  const library=createTextbookLibrary({directory:uid==='local'?join(dataDirectory,'textbook-library'):join(dataDirectory,'users',uid,'textbook-library'),parseDocument:options=>parseWithMinerU({...options,includeArtifacts:true}),cleanBatch:cleanTextbookBatch});
+  const pending=library.initialize().then(()=>library);libraries.set(uid,pending);pending.catch(()=>libraries.delete(uid));
+ }
+ return libraries.get(uid);
+}
+const loginAttempts=new Map();
+let version=process.env.APP_VERSION;
+if(!version)try{version=execFileSync('git',['rev-parse','--short','HEAD'],{cwd:root,encoding:'utf8',stdio:['ignore','pipe','ignore']}).trim()}catch{version='development'}
+let draining=false;
 
 const mime = { '.html':'text/html; charset=utf-8', '.css':'text/css; charset=utf-8', '.js':'text/javascript; charset=utf-8', '.mjs':'text/javascript; charset=utf-8', '.wasm':'application/wasm', '.woff2':'font/woff2', '.woff':'font/woff', '.json':'application/json; charset=utf-8', '.svg':'image/svg+xml' };
-const server = http.createServer(async (req, res) => {
+async function handleRequest(req,res) {
   const url = new URL(req.url, 'http://localhost');
+  res.setHeader('X-Content-Type-Options','nosniff');
+  res.setHeader('Referrer-Policy','same-origin');
+  res.setHeader('X-Frame-Options','DENY');
+  if(url.pathname==='/healthz')return send(res,draining?503:200,{ok:!draining,version});
+  if(url.pathname==='/readyz'){try{workspaceStore.db.prepare('SELECT 1').get();return send(res,draining?503:200,{ok:!draining,version})}catch{return send(res,503,{ok:false})}}
+  if(url.pathname.startsWith('/api/')){
+   const origin=hosted?publicOrigin:`http://${req.headers.host}`;
+   const localHost=[`localhost:${port}`,`127.0.0.1:${port}`].includes(req.headers.host);
+   if((!hosted&&!localHost)||!sameOrigin(req,origin))return send(res,403,{error:{message:'请求来源无效'}});
+   if(!['GET','HEAD'].includes(req.method)&&!req.headers.origin&&hosted&&req.headers['x-dingzheng-client']!=='1')return send(res,403,{error:{message:'缺少同源请求标记'}});
+   const token=sessionToken(req),user=hosted?workspaceStore.user(token):{id:'local',username:'本机用户'};
+   if(url.pathname==='/api/auth/session'&&req.method==='GET')return send(res,200,{mode:hosted?'hosted':'local',user,version});
+   if(url.pathname==='/api/auth/login'&&req.method==='POST'){
+    if(!hosted)return send(res,400,{error:{message:'本机模式无需登录'}});
+    const key=req.socket.remoteAddress||'unknown',now=Date.now(),attempt=loginAttempts.get(key);
+    if(attempt&&attempt.until>now&&attempt.count>=10)return send(res,429,{error:{message:'登录尝试过多，请十五分钟后重试'}});
+    if(!attempt||attempt.until<=now)loginAttempts.set(key,{until:now+900000,count:0});
+    loginAttempts.get(key).count++;
+    if(loginAttempts.size>10000)for(const [key,value]of loginAttempts)if(value.until<now)loginAttempts.delete(key);
+    try{const body=JSON.parse((await readRawBody(req,4096)).toString());const result=await workspaceStore.login(body.username,body.password);loginAttempts.delete(key);res.setHeader('Set-Cookie',cookie(result.token,true));return send(res,200,{user:result.user})}catch(e){return send(res,e.status||400,{error:{message:e.status===401?e.message:'登录失败，请检查输入'}})}
+   }
+   if(!user)return send(res,401,{error:{message:'请先登录'}});
+   if(req.headers['x-workspace-user']&&req.headers['x-workspace-user']!==user.id)return send(res,409,{error:{message:'当前登录账号已变化，请刷新；本次操作未执行'}});
+   req.appUser=user;
+   if(url.pathname==='/api/auth/logout'&&req.method==='POST'){workspaceStore.logout(token);res.setHeader('Set-Cookie',cookie('',hosted,true));return send(res,200,{ok:true})}
+   if(url.pathname==='/api/storage/meta'&&req.method==='GET')return send(res,200,{revision:workspaceStore.revision(user.id)});
+   if(url.pathname==='/api/storage/entry'&&req.method==='GET'){try{return send(res,200,{value:workspaceStore.get(user.id,url.searchParams.get('store'),url.searchParams.get('key'))})}catch(e){return send(res,e.status||500,{error:{message:e.message}})}}
+   if(url.pathname==='/api/storage/transaction'&&req.method==='POST'){try{const body=JSON.parse((await readRawBody(req,300*1024*1024)).toString());return send(res,200,{revision:workspaceStore.commit(user.id,body.revision,body.operations)})}catch(e){return send(res,e.status||400,{error:{message:e.message}})}}
+   if(hosted&&url.pathname.startsWith('/api/codex/'))return send(res,400,{error:{message:'托管版不共享本机 ChatGPT 登录；请使用 API 模型服务。'}});
+  }
+  const textbookLibrary=url.pathname.startsWith('/api/textbooks')?await libraryFor(req.appUser.id):null;
   if (url.pathname.startsWith('/api/codex/')) return handleCodex(req, res, url);
   if (req.method === 'GET' && url.pathname === '/api/config') {
     return send(res, 200, { hasServerKey: Boolean(process.env.SILICONFLOW_API_KEY), hasMineruKey: Boolean(process.env.MINERU_API_KEY), baseUrl: process.env.SILICONFLOW_BASE_URL || 'https://api.siliconflow.cn/v1' });
@@ -202,8 +253,10 @@ const server = http.createServer(async (req, res) => {
     res.writeHead(200, { 'Content-Type': mime[extname(safe)] || 'application/octet-stream', 'Cache-Control':'no-cache' });
     res.end(data);
   } catch { send(res, 404, 'Not found'); }
-});
-server.listen(Number(process.env.PORT) || 4173, '127.0.0.1', () => console.log(`钉正已启动：http://localhost:${Number(process.env.PORT) || 4173}`));
+}
+const server=http.createServer((req,res)=>handleRequest(req,res).catch(error=>{console.error('request_failed',error.message);if(!res.headersSent)send(res,500,{error:{message:'服务器处理失败，请稍后重试'}});else res.end()}));
+server.listen(port, hosted ? (process.env.HOST || '0.0.0.0') : '127.0.0.1', () => console.log(`钉正已启动：${publicOrigin} · ${version} · ${hosted?'hosted':'local'}`));
+for(const signal of ['SIGINT','SIGTERM'])process.once(signal,()=>{draining=true;server.close(async()=>{workspaceStore.close();await unlink(lockPath).catch(()=>{});process.exit(0)});server.closeIdleConnections();setTimeout(()=>process.exit(0),25000).unref()});
 
 async function handleCodex(req, res, url) {
   // This is a local app. Reject DNS rebinding and cross-origin requests before
@@ -348,6 +401,7 @@ async function mineruJson(url, options = {}) {
 }
 
 function isLocalAppRequest(req) {
+  if(hosted)return Boolean(req.appUser)&&sameOrigin(req,publicOrigin);
   const host = req.headers.host || '';
   const port = Number(process.env.PORT) || 4173;
   if (![ `localhost:${port}`, `127.0.0.1:${port}` ].includes(host)) return false;

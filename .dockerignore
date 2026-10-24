@@ -1,0 +1,9 @@
+.git
+.local
+.env
+node_modules
+output
+tmp
+artifacts
+.playwright-cli
+*.log

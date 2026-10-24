@@ -7,3 +7,6 @@ output/
 artifacts/
 server.log
 .playwright-cli/
+
+deploy/.env
+backups/

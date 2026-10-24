@@ -6,7 +6,10 @@
   "scripts": {
     "start": "node server.mjs",
     "build:markdown": "esbuild chat-markdown-renderer.js --bundle --format=esm --outfile=public/vendor/chat-markdown.js",
-    "test": "node --test"
+    "test": "node --test",
+    "accounts": "node scripts/accounts.mjs",
+    "backup": "node scripts/backup.mjs",
+    "release": "sh scripts/release.sh"
   },
   "dependencies": {
     "@llamaindex/openai": "^0.4.22",
@@ -26,5 +29,8 @@
   },
   "devDependencies": {
     "esbuild": "^0.28.2"
+  },
+  "engines": {
+    "node": ">=24.14.0 <25"
   }
 }
