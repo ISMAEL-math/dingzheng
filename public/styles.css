@@ -651,8 +651,15 @@ body.sidebar-collapsed .profile-menu{left:88px;right:auto;bottom:12px;width:292p
 .exam-question img{max-width:100%}.exam-question table,.exam-answer-item table{border-collapse:collapse;max-width:100%;font-size:10pt}.exam-question th,.exam-question td,.exam-answer-item th,.exam-answer-item td{border:.2mm solid #666;padding:1mm 2mm}
 .exam-page .katex{font-size:1em}.exam-page .katex-display{margin:2mm 0;overflow:visible}.exam-page .katex-display>.katex{white-space:normal}
 .exam-answer-header{text-align:center;margin:0 0 7mm}.exam-answer-header h1{font-size:17pt;margin:0 0 2mm}.exam-answer-header p{margin:0;font-size:10pt}
-.exam-answer-item{margin:0 0 6mm;font-size:10.5pt;line-height:1.8;break-inside:avoid}.exam-answer-item h3{font-size:11pt;margin:0 0 2mm}.exam-answer-item h3 span{font-size:9pt;font-weight:400;color:#555;margin-left:2mm}.exam-answer-item p{margin:0 0 2mm}
-.exam-explanation{margin-top:2mm}.exam-explanation>b{font-size:9pt;display:block;margin-bottom:1mm}
+.exam-answer-item{margin:0 0 6mm;font-size:10.5pt;line-height:1.8;break-inside:avoid}.exam-answer-line{display:flex;gap:2mm;align-items:baseline}
+.exam-answer-line>b{flex:none;font-size:11pt}
+.exam-reference-answer p{margin:0}
+.exam-reference-answer p+p{margin-top:1.5mm}.exam-answer-item p{margin:0 0 2mm}
+.exam-explanation{margin-top:1.5mm}
+.exam-explanation b{margin-right:2mm}
+.exam-explanation p{margin:0}
+.exam-explanation p:first-child{display:inline}
+.exam-explanation p+p{margin-top:1.5mm}.exam-explanation>b{font-size:9pt;display:block;margin-bottom:1mm}
 .review-check-list{padding-left:0;list-style:none;max-height:45vh;overflow:auto}.review-check-list li{padding:12px 0;border-bottom:1px solid #f0f0f0;font-size:13px}.review-check-list span{display:block;color:#8b784f;line-height:1.8;margin:5px 0}.review-check-list .text-link{font-size:13px}
 @media(max-width:680px){
  .notebook-heading-actions{margin:0 0 15px}.notebook-heading-actions button{font-size:13px}.notebook-rail-row{flex:none;border:1px solid #ebebeb;border-radius:20px;padding-right:4px}.notebook-rail-row .notebook-subject,.notebook-rail-row .notebook-book{border:0}.notebook-rail-row>.rail-more{height:24px;width:22px}
@@ -988,3 +995,14 @@ input[type="checkbox"],input[type="radio"]{accent-color:#1f2124}
 .textbook-row-link{color:#b6bdc8}
 .textbook-row-link:hover{color:#3159cc}
 .textbook-row .tag.blue,.textbook-detail .tag.blue{background:#e3ecfc;color:#3a5ec7;font-weight:600}
+
+/* ===== 答案条目紧凑排版修正层 ===== */
+.exam-answer-item .exam-answer-line{display:flex;gap:2mm;align-items:baseline}
+.exam-answer-item .exam-answer-line>b{flex:none;font-size:11pt}
+.exam-answer-item .exam-reference-answer p{margin:0}
+.exam-answer-item .exam-reference-answer p+p{margin-top:1.5mm}
+.exam-answer-item .exam-explanation{margin-top:1.5mm}
+.exam-answer-item .exam-explanation b{margin-right:2mm}
+.exam-answer-item .exam-explanation p{margin:0}
+.exam-answer-item .exam-explanation p:first-of-type{display:inline}
+.exam-answer-item .exam-explanation p+p{margin-top:1.5mm}
