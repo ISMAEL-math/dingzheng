@@ -636,10 +636,8 @@ body.sidebar-collapsed .profile-menu{left:88px;right:auto;bottom:12px;width:292p
 .exam-page-body{flex:1;min-height:0;overflow:visible}.exam-page-body>*{box-sizing:border-box}
 .exam-page-footer{flex:none;display:flex;justify-content:space-between;align-items:center;border-top:.2mm solid #999;padding-top:2mm;height:8mm;margin-top:3mm;font-size:8pt;color:#555;gap:10mm}
 .exam-page-footer>span:first-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.exam-page-number{white-space:nowrap}
-.exam-document-header{margin:0 0 5mm;text-align:center}.exam-subject{margin:0 0 1mm;font-size:10pt;letter-spacing:.1em}
-.exam-title{font-family:'Songti SC','STSong','Noto Serif SC',serif;font-size:19pt;line-height:1.4;font-weight:700;margin:0 0 6mm;color:#111;overflow-wrap:anywhere}
-.exam-student-meta{display:flex;justify-content:space-between;gap:5mm;font-size:10pt;padding-bottom:3mm;border-bottom:.4mm solid #111}
-.exam-section-heading{font-size:12pt;line-height:1.6;font-weight:700;margin:4mm 0 3mm;padding:1.5mm 0;border-bottom:.2mm solid #999;color:#111}
+.exam-document-header{margin:0 0 5mm;text-align:center}.exam-title{font-family:'Songti SC','STSong','Noto Serif SC',serif;font-size:19pt;line-height:1.4;font-weight:700;margin:0 0 6mm;color:#111;overflow-wrap:anywhere}
+.exam-section-heading{font-size:12pt;line-height:1.6;font-weight:700;margin:4mm 0 3mm;padding:0;color:#111}
 .exam-section-heading small{font-size:9pt;font-weight:400;margin-left:4mm}
 .exam-question{margin:0 0 5mm;break-inside:avoid;page-break-inside:avoid;font-size:11pt;line-height:1.8}
 .exam-question-prompt{display:flex;gap:2mm;align-items:baseline}.exam-question-number{min-width:4mm;flex:none;font-weight:700;font-family:'Times New Roman',serif}
