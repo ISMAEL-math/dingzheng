@@ -650,7 +650,7 @@ body.sidebar-collapsed .profile-menu{left:88px;right:auto;bottom:12px;width:292p
 .exam-figure{margin:3mm 0 3mm 6mm;text-align:center;break-inside:avoid}.exam-figure img{max-width:100%;max-height:55mm;object-fit:contain}.exam-figure figcaption{font-size:9pt;margin:1mm 0}
 .exam-question img{max-width:100%}.exam-question table,.exam-answer-item table{border-collapse:collapse;max-width:100%;font-size:10pt}.exam-question th,.exam-question td,.exam-answer-item th,.exam-answer-item td{border:.2mm solid #666;padding:1mm 2mm}
 .exam-page .katex{font-size:1em}.exam-page .katex-display{margin:2mm 0;overflow:visible}.exam-page .katex-display>.katex{white-space:normal}
-.exam-answer-header{text-align:center;margin:0 0 7mm;border-bottom:.4mm solid #111;padding-bottom:4mm}.exam-answer-header h1{font-size:17pt;margin:0 0 2mm}.exam-answer-header p{margin:0;font-size:10pt}
+.exam-answer-header{text-align:center;margin:0 0 7mm}.exam-answer-header h1{font-size:17pt;margin:0 0 2mm}.exam-answer-header p{margin:0;font-size:10pt}
 .exam-answer-item{margin:0 0 6mm;font-size:10.5pt;line-height:1.8;break-inside:avoid}.exam-answer-item h3{font-size:11pt;margin:0 0 2mm}.exam-answer-item h3 span{font-size:9pt;font-weight:400;color:#555;margin-left:2mm}.exam-answer-item p{margin:0 0 2mm}
 .exam-explanation{margin-top:2mm}.exam-explanation>b{font-size:9pt;display:block;margin-bottom:1mm}
 .review-check-list{padding-left:0;list-style:none;max-height:45vh;overflow:auto}.review-check-list li{padding:12px 0;border-bottom:1px solid #f0f0f0;font-size:13px}.review-check-list span{display:block;color:#8b784f;line-height:1.8;margin:5px 0}.review-check-list .text-link{font-size:13px}
