@@ -957,3 +957,10 @@ input[type="checkbox"],input[type="radio"]{accent-color:#1f2124}
 .info-dot:hover::after,.info-dot:focus::after,.info-dot:focus-visible::after{opacity:1;transform:translateX(-50%) translateY(0)}
 .info-dot.tip-open::after{opacity:1;transform:translateX(-50%) translateY(0)}
 .info-dot.tip-open{border-color:#8f8f8f;color:#4c4c4c}
+
+/* ===== 恢复模型用量热力图绿色梯度（用户指定保留） ===== */
+.usage-cell,.usage-legend i{background:#eceef1}
+.usage-cell.level-1,.usage-legend i.level-1{background:#d9eadd}
+.usage-cell.level-2,.usage-legend i.level-2{background:#a8d1b1}
+.usage-cell.level-3,.usage-legend i.level-3{background:#65a879}
+.usage-cell.level-4,.usage-legend i.level-4{background:#28764b}
