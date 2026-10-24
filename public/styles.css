@@ -974,3 +974,8 @@ input[type="checkbox"],input[type="radio"]{accent-color:#1f2124}
 .library-zone .library-drop{margin:0 0 14px}
 .library-zone .document-filters{margin-bottom:12px}
 @media(max-width:680px){.library-zone-actions{width:100%}.library-zone-actions .select{flex:1;width:auto;min-width:0}}
+
+/* ===== 黄色警告收起：单行紧凑，悬停/点按展开全文 ===== */
+.document-warning{display:flex;align-items:baseline;gap:7px;max-height:30px;overflow:hidden;padding:5px 11px;border:0;border-left:3px solid #e0b26e;border-radius:7px;background:#faf7f1;color:#8a6f45;font-size:12.5px;line-height:1.5;cursor:default;transition:max-height .18s ease}
+.document-warning::before{content:"⚠";flex:none;font-size:11px;color:#c69a4e;transform:translateY(1px)}
+.document-warning:hover,.document-warning:focus-within{max-height:240px}
