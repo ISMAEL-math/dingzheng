@@ -964,3 +964,19 @@ input[type="checkbox"],input[type="radio"]{accent-color:#1f2124}
 .usage-cell.level-2,.usage-legend i.level-2{background:#a8d1b1}
 .usage-cell.level-3,.usage-legend i.level-3{background:#65a879}
 .usage-cell.level-4,.usage-legend i.level-4{background:#28764b}
+
+/* ===== 学习资料：知识库 / 教材库 平级双区 ===== */
+.library-zone+.library-zone{margin-top:16px}
+.library-zone-head{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;flex-wrap:wrap;margin-bottom:14px}
+.library-zone-title h2{font-size:17px;line-height:1.5;font-weight:650;color:#292929;margin:0}
+.library-zone-title>span{display:block;font-size:13px;color:#8a9099;margin-top:3px}
+.library-zone-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.library-zone-actions .select{width:215px}
+.library-zone .library-drop{margin:0 0 14px}
+.library-zone .document-filters{margin-bottom:12px}
+.textbook-zone-preview{display:grid;gap:8px}
+.textbook-zone-row{display:flex;align-items:center;gap:12px;padding:11px 14px;border:1px solid #ececec;border-radius:10px;background:#fff;cursor:pointer;text-align:left}
+.textbook-zone-row:hover{background:#fafafa}
+.textbook-zone-row strong{flex:1;min-width:0;font-size:13px;font-weight:550;color:#333;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.textbook-zone-empty{margin:0;font-size:13px;color:#8a9099}
+@media(max-width:680px){.library-zone-actions{width:100%}.library-zone-actions .select{flex:1;width:auto;min-width:0}}
